@@ -8,8 +8,11 @@ AVCodecLocalVideoThread::AVCodecLocalVideoThread(QObject *parent) : QObject(pare
 
 int AVCodecLocalVideoThread::closeAvdecodec()
 {
+    goplay(false);
     av_free(out_buffer);
     av_free(pFrameRGB);
+    av_free(pFrame);
+    av_free(pCodec);
     avcodec_close(pCodecCtx);
     avformat_close_input(&pFormatCtx);
 }
@@ -103,9 +106,20 @@ int AVCodecLocalVideoThread::initAvdecodec()
 
     av_dump_format(pFormatCtx, 0, file_path, 0); //输出视频信息
 
+    goplay(true);
+
+    return 0;
+}
+
+void AVCodecLocalVideoThread::goplay(bool play)
+{
+    this->play = play;
     int index = 0;
-    while (1)
+    while (this->play)
     {
+        if(!this->play){
+            break;
+        }
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //这里认为视频读取完了
@@ -115,7 +129,7 @@ int AVCodecLocalVideoThread::initAvdecodec()
             ret = avcodec_decode_video2(pCodecCtx, pFrame, &got_picture,packet);
             if (ret < 0) {
                 qDebug() << "decode video error.";
-                return -1;
+                return;
             }
             if (got_picture) {
                  sws_scale(img_convert_ctx,
@@ -147,8 +161,7 @@ int AVCodecLocalVideoThread::initAvdecodec()
         }
         av_free_packet(packet);
     }
-
-    return 0;
+    av_free_packet(packet);
 }
 
 

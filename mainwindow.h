@@ -43,12 +43,10 @@ public:
     ~MainWindow();
 private:
     bool canResize = false;
-    AVCodecLocalVideoThread *pAVCodecLocalVideThread;
-    avcodeclocalaudiothread *aAvCodecLocalAudioThread;
-    avcodecNetAVthread *mavCodecNetThread;
+    AVCodecLocalVideoThread *pAVCodecLocalVideThread = nullptr;
+    avcodeclocalaudiothread *aAvCodecLocalAudioThread = nullptr;
+    avcodecNetAVthread *mavCodecNetThread = nullptr;
     QThread *pLocalThread, *aLocalThread;
-    uint8_t *out_buffer;
-    AVFrame *tempFrame;
     QAudioFormat audioFormat;
     QAudioOutput *audioOutput;
     QIODevice *audioDevice;
@@ -57,8 +55,14 @@ private:
     void initLocalAVCodec();
     void initNetAVCodec();
     void initVideoWidget();
-    void close();
+    void release();
     int ScaleImg(AVFrame *src_picture, int nSrcH, int nSrcW, AVFrame *dst_picture,int nDstH ,int nDstW);
+
+    bool m_pressed;
+    QPoint m_point;//可移动的点
+    void mousePressEvent(QMouseEvent* event);
+    void mouseReleaseEvent(QMouseEvent* event);
+    void mouseMoveEvent(QMouseEvent* event);//设置窗体可移动
 
 private:
     Ui::MainWindow *ui;

@@ -43,6 +43,8 @@ public:
 
 private:
 
+    bool play = true;
+    void goplay(bool play);
     char *file_path = "";
     int fileTimes = 0;
     int videoStream, i, numBytes;

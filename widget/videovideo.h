@@ -42,6 +42,7 @@ public:
     void mouseReleaseEvent(QMouseEvent *event);
     bool eventFilter(QObject *watched, QEvent *event);
     void updateImageData(AVFrame *rgbData, int width, int height, int percent);
+    void release();
 
 private:
 
@@ -57,8 +58,11 @@ private:
     int mWidth = 400;
     int mHeight = 300;
     void paintProgressBar(QPainter *painter);//绘制进度条
+    void paintCloseBar(QPainter *painter);
+    void paintMoveBar(QPainter *painter);
 
 signals:
+    void closeSignal();
 
 };
 

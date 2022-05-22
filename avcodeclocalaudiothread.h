@@ -41,6 +41,8 @@ public:
     int cutAudio = 0;
     void setFilePath(char *path);
 private:
+    bool play = true;
+    void goplay(bool play);
     //音频流相关
     char *file_path = "";
     AVFrame *aAvFrame;
@@ -52,7 +54,6 @@ private:
     int out_channer_nb;
     int audioStream;
     void initAudoCodec();
-
     //音频播放
     QAudioFormat audioFormat;
     QAudioOutput *audioOutput;

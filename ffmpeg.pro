@@ -160,6 +160,7 @@ LIBS += $$PWD/ffmpeg/lib/avcodec.lib\
         $$PWD/ffmpeg/lib/postproc.lib\
         $$PWD/ffmpeg/lib/swresample.lib\
         $$PWD/ffmpeg/lib/swscale.lib
+LIBS += -lDbgHelp
 
 DISTFILES += \
     ffmpeg/lib/avcodec-57.def \
@@ -186,4 +187,14 @@ DISTFILES += \
     ffmpeg/lib/swresample.lib \
     ffmpeg/lib/swscale-4.def \
     ffmpeg/lib/swscale.lib
+
+RESOURCES += \
+    src.qrc
+
+#release版本可调试
+QMAKE_CXXFLAGS_RELEASE += $$QMAKE_CFLAGS_RELEASE_WITH_DEBUGINFO
+#release版也将生成“.pdb”后缀的调试信息文件
+QMAKE_LFLAGS_RELEASE = /INCREMENTAL:NO /DEBUG
+#调用库
+
 

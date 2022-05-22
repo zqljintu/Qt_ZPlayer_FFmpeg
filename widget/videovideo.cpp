@@ -25,6 +25,8 @@ void VideoVideo::paintEvent(QPaintEvent *event)
     }
     if (this->showProgressBar) {
         paintProgressBar(painter);
+        paintMoveBar(painter);
+        paintCloseBar(painter);
     }
 
     painter->end();
@@ -55,6 +57,21 @@ void VideoVideo::paintProgressBar(QPainter *painter)
     painter->drawEllipse(x_current2, this->height() * h_percent, 8, 8);
 }
 
+void VideoVideo::paintCloseBar(QPainter *painter)
+{
+    QPixmap pix1;
+    pix1.load(":/new/prefix1/sources/close_normal.png");
+    painter->drawPixmap(this->width() - 32, 16, 16, 16, pix1);
+}
+
+void VideoVideo::paintMoveBar(QPainter *painter)
+{
+    QColor outColor(0,20,20,100);
+    painter->setBrush(outColor);
+    QRectF rect1 = QRectF(this->width() * 0.35f, 1, this->width() * 0.3f, 10);
+    painter->drawRoundedRect(rect1, 4, 4);
+}
+
 void VideoVideo::mousePressEvent(QMouseEvent *event)
 {
      if ((event->pos().x() > start_percent * this->width()) && (event->pos().x() < (1-start_percent) * this->width())
@@ -63,6 +80,14 @@ void VideoVideo::mousePressEvent(QMouseEvent *event)
          int pressX = event->pos().x();
          this->currentPercent = (pressX - this->width() * start_percent) * 100 / (this->width() * w_percent);
          update();
+     } else if((event->pos().x() > 0.35 * this->width()) && (event->pos().x() < (1-0.35) * this->width())
+               && (event->pos().y() < 80)){
+         QWidget::mousePressEvent(event);
+     } else if((event->pos().x() > this->width() - 32) && (event->pos().x() < this->width() -16 )
+               && (event->pos().y() > 16) && (event->pos().y() < 32)){
+         emit closeSignal();
+     }else {
+
      }
 }
 
@@ -75,6 +100,11 @@ void VideoVideo::mouseMoveEvent(QMouseEvent *event)
             int pressX = event->pos().x();
             this->currentPercent = (pressX - this->width() * start_percent) * 100 / (this->width() * w_percent);
             update();
+        } else if((event->pos().x() > 0.35 * this->width()) && (event->pos().x() < (1-0.35) * this->width())
+                  && (event->pos().y() < 80)){
+            QWidget::mouseMoveEvent(event);
+        } else {
+
         }
     }
 
@@ -85,6 +115,11 @@ void VideoVideo::mouseReleaseEvent(QMouseEvent *event)
     if ((event->pos().x() > start_percent * this->width()) && (event->pos().x() < (1-start_percent) * this->width())
             && (event->pos().y() > h_percent * this->height()) && (event->pos().y() < h_percent * this->height() + 8))
     {
+
+    } else if((event->pos().x() > 0.35 * this->width()) && (event->pos().x() < (1-0.35) * this->width())
+             && (event->pos().y() < 80)){
+       QWidget::mouseReleaseEvent(event);
+    } else {
 
     }
 }
@@ -110,6 +145,13 @@ void VideoVideo::updateImageData(AVFrame *rgbData, int width, int height, int pe
     this->mHeight = height;
     this->currentPercent = percent;
     update();
+}
+
+void VideoVideo::release()
+{
+    if (rgbData) {
+        av_free(rgbData);
+    }
 }
 
 VideoVideo:: ~VideoVideo()

@@ -33,6 +33,7 @@ void MainWindow::initLocalAVCodec()
     connect(pAVCodecLocalVideThread,&AVCodecLocalVideoThread::singalVideoData,this,&MainWindow::onReieveVideoData);
     connect(aAvCodecLocalAudioThread,&avcodeclocalaudiothread::initAudioFinish,pAVCodecLocalVideThread,&AVCodecLocalVideoThread::initAvdecodec);
     connect(this, &MainWindow::startAcodecLocalVideo, aAvCodecLocalAudioThread, &avcodeclocalaudiothread::initAvdecodec);
+    connect(ui->openGLWidget, &VideoVideo::closeSignal, this, &MainWindow::release);
     aLocalThread->start();
     pLocalThread->start();
     emit startAcodecLocalVideo();
@@ -112,10 +113,21 @@ void MainWindow::onReieveAudioData(uint8_t *aAuifoDataS16, int length)
 
 }
 
-void MainWindow::close(){
-    pLocalThread->deleteLater();
-    av_free(tempFrame);
-    av_free(out_buffer);
+void MainWindow::release(){
+    if (pAVCodecLocalVideThread){
+       pAVCodecLocalVideThread->closeAvdecodec();
+    }
+    if (aAvCodecLocalAudioThread){
+       aAvCodecLocalAudioThread->closeAvdecodec();
+    }
+    if (mavCodecNetThread) {
+        mavCodecNetThread->closeAvdecodec();
+    }
+    if (pLocalThread){
+       pLocalThread->quit();
+       pLocalThread->wait();
+    }
+    qApp->quit();
 }
 
 MainWindow::~MainWindow()
@@ -123,6 +135,38 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+void MainWindow::mousePressEvent(QMouseEvent *event)
+{
+
+    if(event->pos().y()< 80)
+    {
+        event->ignore();
+        if(event->button()==Qt::LeftButton)
+        {
+            m_pressed=true;
+            m_point=event->pos();
+        }
+    }
+
+}
+void MainWindow::mouseMoveEvent(QMouseEvent *event)
+{
+    if(event->pos().y() < 80)
+    {
+        if(m_pressed)
+        {
+            move(event->pos() - m_point + pos());
+        }
+    }
+}
+void MainWindow::mouseReleaseEvent(QMouseEvent *event)
+{
+    Q_UNUSED(event);
+    if(event->pos().y() < 80)
+    {
+        m_pressed=true;
+    }
+}
 
 
 int MainWindow::ScaleImg(AVFrame *src_picture, int nSrcH, int nSrcW, AVFrame *dst_picture,int nDstH ,int nDstW)

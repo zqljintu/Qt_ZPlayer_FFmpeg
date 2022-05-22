@@ -235,7 +235,9 @@ int avcodecNetAVthread::closeAvdecodec()
     av_free(out_buffer);
     av_free(a_out_buffer);
     av_free(pFrameRGB);
+    av_free(pFrame);
     av_free(aAvFrame);
+    av_free(pCodec);
     avcodec_close(pCodecCtx);
     avcodec_close(aCodecCtx);
     avformat_close_input(&pFormatCtx);

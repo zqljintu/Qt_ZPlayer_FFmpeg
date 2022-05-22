@@ -8,6 +8,11 @@ avcodeclocalaudiothread::avcodeclocalaudiothread(QObject *parent) : QObject(pare
 
 int avcodeclocalaudiothread::closeAvdecodec()
 {
+    goplay(false);
+    av_free(a_out_buffer);
+    av_free(aAvFrame);
+    avcodec_close(aCodecCtx);
+    avformat_close_input(&pFormatCtx);
     return 0;
 }
 
@@ -57,10 +62,21 @@ int avcodeclocalaudiothread::initAvdecodec()
 
     av_dump_format(pFormatCtx, 0, file_path, 0); //输出视频信息
 
+    goplay(true);
+
+    return 0;
+}
+
+void avcodeclocalaudiothread::goplay(bool play)
+{
+    this->play = play;
     int out_buffer_size;
     double sleepTime = 0;
-    while (1)
+    while (this->play)
     {
+        if(!this->play){
+            break;
+        }
         if (av_read_frame(pFormatCtx, packet) < 0)
         {
             break; //这里认为视频读取完了
@@ -71,7 +87,7 @@ int avcodeclocalaudiothread::initAvdecodec()
             ret = avcodec_decode_audio4(aCodecCtx, aAvFrame, &got_frame, packet);
             if (ret < 0){
                 qDebug() << "decode audio error.";
-                return -1;
+                return;
             }
             if (got_frame > 0){
                 swr_convert(
@@ -103,8 +119,7 @@ int avcodeclocalaudiothread::initAvdecodec()
         }
         av_free_packet(packet);
     }
-
-    return 0;
+    av_free_packet(packet);
 }
 
 void avcodeclocalaudiothread::setFilePath(char *path)
